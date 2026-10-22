@@ -1,0 +1,28 @@
+# --- Private / source material: never commit ---
+/hostinger-export/
+duct-divers.md
+duct-divers-readme.md
+
+# --- Secrets ---
+.env
+.env.*
+!.env.example
+*.pem
+
+# --- Dependencies & build output ---
+/node_modules
+/.next/
+/out/
+/build
+/public/_img/
+/.generated/
+*.tsbuildinfo
+next-env.d.ts
+
+# --- Tooling / OS ---
+.DS_Store
+/.playwright-mcp/
+/coverage
+npm-debug.log*
+.vercel
+/migration/

@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+/* Design tokens taken from the old site's builder styles: light grey page, near-black text,
+   Prompt for headings, Lato for body text, outlined buttons that turn blue on hover. */
+@theme {
+  --color-page: #f1f1f1;
+  --color-surface: #ffffff;
+  --color-ink: #1d1e20;
+  --color-muted: #55585e;
+  --color-line: #d2d2d2;
+  --color-accent: #176be0;
+  --font-heading: var(--font-prompt), "Helvetica Neue", Arial, sans-serif;
+  --font-body: var(--font-lato), "Helvetica Neue", Arial, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-page);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+/* ---------- Buttons (outlined, like the old site) ---------- */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0.6rem 1.75rem;
+  border: 1px solid var(--color-ink);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.2;
+  text-decoration: none;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-align: center;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+.button:hover {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+/* ---------- Page variants (set on <ContentPage className=…>) ---------- */
+.light-headings :is(h1, h2, h3, h4, h5, h6) { font-weight: 400; }
+.centered-text .prose { text-align: center; }
+
+/* ---------- Markdown content ---------- */
+.prose {
+  max-width: 760px;
+  margin-inline: auto;
+  overflow-wrap: break-word;
+}
+.prose > * + * { margin-top: 1.1em; }
+.prose h1 { font-size: clamp(1.75rem, 3.6vw, 2.25rem); }
+.prose h2 { font-size: clamp(1.6rem, 3.3vw, 2rem); }
+.prose h3 { font-size: clamp(1.45rem, 3vw, 1.8rem); }
+.prose h4 { font-size: clamp(1.35rem, 3vw, 1.75rem); }
+.prose h5 { font-size: clamp(1.25rem, 2.6vw, 1.6rem); font-weight: 400; }
+.prose h6 { font-size: clamp(1.1rem, 2.2vw, 1.35rem); font-weight: 400; }
+.prose :is(h1, h2, h3, h4, h5, h6) { margin-top: 1.6em; }
+.prose > :first-child { margin-top: 0; }
+.prose a:not(.button):not(.yt-lite__link) {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.prose ul { list-style: disc; padding-left: 1.4em; }
+.prose ol { list-style: decimal; padding-left: 1.4em; }
+.prose li + li { margin-top: 0.35em; }
+.prose blockquote { border-left: 3px solid var(--color-line); padding-left: 1em; color: var(--color-muted); }
+.prose code { background: #e4e4e4; padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+.prose pre { background: #1d1e20; color: #f1f1f1; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+.prose pre code { background: none; padding: 0; }
+.prose table { width: 100%; border-collapse: collapse; display: block; overflow-x: auto; }
+.prose th, .prose td { border: 1px solid var(--color-line); padding: 0.4em 0.6em; text-align: left; }
+.prose img { height: auto; max-width: 100%; margin-inline: auto; border-radius: 4px; }
+.prose .button-row { text-align: center; }
+.prose .button-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; }
+.prose .button-group > .button-row { margin: 0; }
+.prose .gallery {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  align-items: start;
+}
+.prose .gallery > p { margin: 0; }
+
+/* ---------- YouTube facade (see components/YouTubeLite.tsx) ---------- */
+.yt-lite {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  max-width: 760px;
+  margin-inline: auto;
+  background: #000;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.yt-lite__link, .yt-lite iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.yt-lite__link img { width: 100%; height: 100%; object-fit: cover; border-radius: 0; }
+.yt-lite__play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 68px;
+  height: 48px;
+  transform: translate(-50%, -50%);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.75);
+  transition: background 0.15s;
+}
+.yt-lite__play::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 54%;
+  transform: translate(-50%, -50%);
+  border-style: solid;
+  border-width: 10px 0 10px 18px;
+  border-color: transparent transparent transparent #fff;
+}
+.yt-lite__link:hover .yt-lite__play { background: #f00; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; }
+}
