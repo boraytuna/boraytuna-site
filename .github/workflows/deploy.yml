@@ -1,0 +1,103 @@
+# Builds the site and uploads it to S3 on every push to main (or when run by hand from the
+# Actions tab). GitHub signs in to AWS with OIDC: no AWS keys are stored in GitHub. The role it
+# assumes can only write to the site bucket (see infra/github-deploy-policy.json).
+#
+# Repository settings it reads (Settings → Secrets and variables → Actions):
+#   variable AWS_ROLE_ARN                 role GitHub assumes; until it's set, only the build runs
+#   variable CLOUDFRONT_DISTRIBUTION_ID   optional; when set, the CloudFront cache is cleared after upload
+#   secret   NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY   contact form key (ends up in the public JS by design)
+
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# One deploy at a time; a newer push waits for the running one instead of racing it.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  AWS_REGION: eu-central-1
+  S3_BUCKET: boraytuna-com-site
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY: ${{ secrets.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY }}
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: site
+          path: out
+          retention-days: 7
+
+  deploy:
+    needs: build
+    if: vars.AWS_ROLE_ARN != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # lets this job ask GitHub for the OIDC token that AWS checks
+    steps:
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        with:
+          name: site
+          path: out
+
+      - uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5.1.1
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+
+      # Upload order matters: new CSS/JS and images first, pages last, so a visitor never gets
+      # a new page that points at files that aren't there yet. Old files are removed at the end.
+      #
+      # Cache-Control:
+      #   _next/static   file names change with every build  -> browsers keep them for a year
+      #   _img, images, files                                -> browsers keep them for a day
+      #   pages and everything else -> browsers always re-check; CloudFront keeps them until the
+      #                                cache is cleared at the end of each deploy
+      - name: Upload build assets
+        run: aws s3 sync out/_next/static "s3://$S3_BUCKET/_next/static" --cache-control "public, max-age=31536000, immutable"
+
+      - name: Upload images and files
+        run: |
+          for dir in _img images files; do
+            if [ -d "out/$dir" ]; then
+              aws s3 sync "out/$dir" "s3://$S3_BUCKET/$dir" --cache-control "public, max-age=86400"
+            fi
+          done
+
+      - name: Upload pages
+        run: >
+          aws s3 sync out "s3://$S3_BUCKET"
+          --exclude "_next/static/*" --exclude "_img/*" --exclude "images/*" --exclude "files/*"
+          --cache-control "public, max-age=0, s-maxage=31536000, must-revalidate"
+
+      - name: Remove files that are no longer in the build
+        run: aws s3 sync out "s3://$S3_BUCKET" --delete --size-only
+
+      - name: Clear the CloudFront cache
+        if: vars.CLOUDFRONT_DISTRIBUTION_ID != ''
+        env:
+          DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
+        run: aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "/*"

@@ -1,0 +1,8 @@
+# Opens a pull request when a GitHub Action used in .github/workflows has a new version.
+# The workflow pins each action to an exact commit, so updates only happen through these PRs.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
