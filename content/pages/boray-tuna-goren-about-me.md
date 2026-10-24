@@ -37,7 +37,7 @@ My strong foundation in problem-solving, paired with my technical expertise, dri
 
 Since August 2026 Tekirdağ/Türkiye
 
-[Resume](/files/boray_tuna_goren_resume_september_2026-s3zr1ca6hxg9hxlq.pdf)
+[Resume](/files/Boray_Tuna_Goren_Resume_October_2026.pdf)
 
 <!-- social-links -->
 <!-- section z1WFjG -->

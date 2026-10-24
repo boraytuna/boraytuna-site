@@ -9,7 +9,7 @@ export const site = {
   logo: "/images/logo-aop63rxbqgfzze3e.png",
   // 480px WebP made by scripts/optimize-images.mjs; plenty for a ~48px-tall header logo on retina screens.
   logoSmall: "/_img/logo-aop63rxbqgfzze3e-480.webp",
-  resume: "/files/boray_tuna_goren_resume_september_2026-s3zr1ca6hxg9hxlq.pdf",
+  resume: "/files/Boray_Tuna_Goren_Resume_October_2026.pdf",
 };
 
 export const nav = [
