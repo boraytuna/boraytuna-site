@@ -12,6 +12,12 @@
       "Effect": "Allow",
       "Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
       "Resource": "arn:aws:s3:::boraytuna-com-site/*"
+    },
+    {
+      "Sid": "ClearSiteCache",
+      "Effect": "Allow",
+      "Action": "cloudfront:CreateInvalidation",
+      "Resource": "arn:aws:cloudfront::*:distribution/E2PIX8RBXRK61C"
     }
   ]
 }

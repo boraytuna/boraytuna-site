@@ -1,6 +1,7 @@
 # Builds the site and uploads it to S3 on every push to main (or when run by hand from the
 # Actions tab). GitHub signs in to AWS with OIDC: no AWS keys are stored in GitHub. The role it
-# assumes can only write to the site bucket (see infra/github-deploy-policy.json).
+# assumes can only write to the site bucket and clear the site's CloudFront cache
+# (see infra/github-deploy-policy.json).
 #
 # Repository settings it reads (Settings → Secrets and variables → Actions):
 #   variable AWS_ROLE_ARN                 role GitHub assumes; until it's set, only the build runs
